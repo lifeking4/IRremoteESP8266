@@ -1638,3 +1638,19 @@ TEST(TestDecodeSamsungAC, Issue1227VeryPoorSignal) {
   stdAc::state_t r, p;
   ASSERT_TRUE(IRAcUtils::decodeToState(&irsend.capture, &r, &p));
 }
+
+// For https://github.com/crankyoldgit/IRremoteESP8266/issues/1388
+TEST(TestDecodeSamsung, SyntheticSelfDecode) {
+  IRsendTest irsend(kGpioUnused);
+  IRrecv irrecv(kGpioUnused);
+  irsend.begin();
+
+  // Normal Samsung 32-bit message.
+  irsend.reset();
+  irsend.sendSAMSUNG(0xE0E040BF);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(decode_type_t::SAMSUNG, irsend.capture.decode_type);
+  EXPECT_EQ(kSamsungBits, irsend.capture.bits);
+  EXPECT_EQ(0xE0E040BF, irsend.capture.value);
+}
